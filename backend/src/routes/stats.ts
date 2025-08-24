@@ -3,7 +3,7 @@ import { SpotifyAPI } from '../utils/spotify';
 
 const router = Router();
 
-const authenticateToken = (req: Request, res: Response, next: any) => {
+const authenticateToken = (req: Request & { accessToken?: string }, res: Response, next: any) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -11,15 +11,15 @@ const authenticateToken = (req: Request, res: Response, next: any) => {
     return res.status(401).json({ error: 'Access token is required' });
   }
 
-  req.body.accessToken = token;
+  req.accessToken = token;
   next();
 };
 
 router.use(authenticateToken);
 
-router.get('/user', async (req: Request, res: Response) => {
+router.get('/user', async (req: Request & { accessToken?: string }, res: Response) => {
   try {
-    const spotify = new SpotifyAPI(req.body.accessToken);
+    const spotify = new SpotifyAPI(req.accessToken!);
     const user = await spotify.getCurrentUser();
     res.json(user);
   } catch (error) {
@@ -28,10 +28,10 @@ router.get('/user', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/top-tracks', async (req: Request, res: Response) => {
+router.get('/top-tracks', async (req: Request & { accessToken?: string }, res: Response) => {
   try {
     const { time_range = 'medium_term', limit = '20' } = req.query;
-    const spotify = new SpotifyAPI(req.body.accessToken);
+    const spotify = new SpotifyAPI(req.accessToken!);
     
     const topTracks = await spotify.getTopTracks(
       time_range as 'short_term' | 'medium_term' | 'long_term',
@@ -45,10 +45,10 @@ router.get('/top-tracks', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/top-artists', async (req: Request, res: Response) => {
+router.get('/top-artists', async (req: Request & { accessToken?: string }, res: Response) => {
   try {
     const { time_range = 'medium_term', limit = '20' } = req.query;
-    const spotify = new SpotifyAPI(req.body.accessToken);
+    const spotify = new SpotifyAPI(req.accessToken!);
     
     const topArtists = await spotify.getTopArtists(
       time_range as 'short_term' | 'medium_term' | 'long_term',
@@ -62,10 +62,10 @@ router.get('/top-artists', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/recently-played', async (req: Request, res: Response) => {
+router.get('/recently-played', async (req: Request & { accessToken?: string }, res: Response) => {
   try {
     const { limit = '20' } = req.query;
-    const spotify = new SpotifyAPI(req.body.accessToken);
+    const spotify = new SpotifyAPI(req.accessToken!);
     
     const recentTracks = await spotify.getRecentlyPlayed(parseInt(limit as string));
     

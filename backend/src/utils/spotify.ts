@@ -47,6 +47,15 @@ export class SpotifyAPI {
 export const generateSpotifyAuthURL = (): string => {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
+
+  if (!clientId) {
+    throw new Error('SPOTIFY_CLIENT_ID environment variable is required');
+  }
+
+  if (!redirectUri) {
+    throw new Error('SPOTIFY_REDIRECT_URI environment variable is required');
+  }
+
   const scopes = [
     'user-read-private',
     'user-read-email',
@@ -60,7 +69,7 @@ export const generateSpotifyAuthURL = (): string => {
     `response_type=code&` +
     `client_id=${clientId}&` +
     `scope=${scopes}&` +
-    `redirect_uri=${encodeURIComponent(redirectUri || '')}&` +
+    `redirect_uri=${encodeURIComponent(redirectUri)}&` +
     `state=${state}`;
 };
 
@@ -75,11 +84,23 @@ export const exchangeCodeForToken = async (code: string): Promise<{
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
   const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
 
+  if (!clientId) {
+    throw new Error('SPOTIFY_CLIENT_ID environment variable is required');
+  }
+
+  if (!clientSecret) {
+    throw new Error('SPOTIFY_CLIENT_SECRET environment variable is required');
+  }
+
+  if (!redirectUri) {
+    throw new Error('SPOTIFY_REDIRECT_URI environment variable is required');
+  }
+
   const response = await axios.post('https://accounts.spotify.com/api/token', 
     new URLSearchParams({
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: redirectUri || '',
+      redirect_uri: redirectUri,
     }).toString(),
     {
       headers: {
