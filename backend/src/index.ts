@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
 import authRoutes from './routes/auth';
 import statsRoutes from './routes/stats';
 
@@ -22,6 +25,11 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Spotify Stats API is running' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+const httpsOptions = {
+  key: fs.readFileSync(path.join(__dirname, '../key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, '../cert.pem'))
+};
+
+https.createServer(httpsOptions, app).listen(PORT, () => {
+  console.log(`Server is running on https://localhost:${PORT}`);
 });
